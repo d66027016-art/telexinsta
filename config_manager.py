@@ -1,6 +1,10 @@
 import json
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load local environment variables from .env if present
+load_dotenv()
 
 # Use DATA_DIR from environment for persistent storage (e.g. Render), else default to current dir
 DATA_DIR = Path(os.getenv("DATA_DIR", "."))

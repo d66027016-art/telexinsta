@@ -13,6 +13,7 @@ config.json
 instagram_session.json
 redeem_codes.json
 users.json
+.env
 
 # Local sessions and media storage
 sessions/
