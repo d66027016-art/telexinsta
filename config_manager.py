@@ -15,29 +15,55 @@ DEFAULT_CONFIG = {
 }
 
 def load_config():
-    """Loads settings from config.json, or creates it with default settings if missing."""
-    if not CONFIG_FILE.exists():
-        save_config(DEFAULT_CONFIG)
-        return DEFAULT_CONFIG
-    try:
-        with CONFIG_FILE.open("r") as f:
-            config = json.load(f)
-            # Ensure all default keys exist
-            for k, v in DEFAULT_CONFIG.items():
-                if k not in config:
-                    config[k] = v
-            return config
-    except Exception:
-        return DEFAULT_CONFIG
+    """Loads settings from config.json, falling back to environment variables if missing or empty."""
+    config = dict(DEFAULT_CONFIG)
+    
+    # 1. Try to load from the JSON config file
+    if CONFIG_FILE.exists():
+        try:
+            with CONFIG_FILE.open("r") as f:
+                file_config = json.load(f)
+                config.update(file_config)
+        except Exception:
+            pass
+            
+    # 2. Fall back to environment variables for empty/missing values
+    env_mappings = {
+        "telegram_token": "TELEGRAM_TOKEN",
+        "telegram_chat_id": "TELEGRAM_CHAT_ID",
+        "instagram_username": "INSTAGRAM_USERNAME"
+    }
+    
+    for config_key, env_var in env_mappings.items():
+        if not config.get(config_key):  # If key is missing or empty string
+            env_val = os.getenv(env_var)
+            if env_val:
+                config[config_key] = env_val
+                
+    # Boolean overrides from environment variables
+    env_notifs = os.getenv("TELEGRAM_NOTIFICATIONS_ENABLED")
+    if env_notifs is not None:
+        config["telegram_notifications_enabled"] = env_notifs.lower() in ("true", "1", "yes")
+        
+    env_bot = os.getenv("TELEGRAM_BOT_ENABLED")
+    if env_bot is not None:
+        config["telegram_bot_enabled"] = env_bot.lower() in ("true", "1", "yes")
+        
+    return config
 
 def save_config(config):
     """Saves settings to config.json."""
     try:
-        # Merge with existing configuration to avoid loss of keys
+        # Load current config (which includes file + env merges)
         current = load_config()
         current.update(config)
+        
+        # Ensure parent directories exist
+        CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        
         with CONFIG_FILE.open("w") as f:
             json.dump(current, f, indent=4)
         return True
     except Exception:
         return False
+
