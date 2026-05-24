@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+instagrapi
+pyTelegramBotAPI
+pydantic
+requests
+pillow
+python-dotenv

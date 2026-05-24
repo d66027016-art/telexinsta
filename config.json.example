@@ -1,0 +1,7 @@
+{
+    "telegram_token": "YOUR_TELEGRAM_BOT_TOKEN",
+    "telegram_chat_id": "YOUR_TELEGRAM_ADMIN_CHAT_ID",
+    "telegram_notifications_enabled": true,
+    "telegram_bot_enabled": true,
+    "instagram_username": "YOUR_INSTAGRAM_USERNAME"
+}

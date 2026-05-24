@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: instagram-reposter-hub
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATA_DIR
+        value: /data
+      - key: PYTHON_UNBUFFERED
+        value: "1"
+    disk:
+      name: veo-persistent-data
+      mountPath: /data
+      sizeGB: 1

@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+ENV/
+
+# Configuration and secrets
+config.json
+instagram_session.json
+redeem_codes.json
+users.json
+
+# Local sessions and media storage
+sessions/
+temp_media/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstaCloner & Telegram Hub</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="glow-bg">
+        <div class="ball ball-1"></div>
+        <div class="ball ball-2"></div>
+        <div class="ball ball-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i data-lucide="instagram"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Insta<span>Cloner</span></h1>
+                    <p>Reels & Posts Automator</p>
+                </div>
+            </div>
+            
+            <div class="status-bar">
+                <div class="status-indicator" id="ig-status-badge">
+                    <span class="dot dot-red" id="ig-dot"></span>
+                    <span class="status-label">Instagram: <strong id="ig-status-text">Disconnected</strong></span>
+                </div>
+                <div class="status-indicator" id="tg-status-badge">
+                    <span class="dot dot-red" id="tg-dot"></span>
+                    <span class="status-label">Telegram Bot: <strong id="tg-status-text">Offline</strong></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-grid">
+            
+            <!-- LEFT PANEL: CONFIG & CONTROLS -->
+            <section class="control-panel">
+                
+                <!-- INSTAGRAM LOGIN -->
+                <div class="glass-card card-ig">
+                    <div class="card-header">
+                        <i data-lucide="user-check"></i>
+                        <h2>Instagram Account</h2>
+                    </div>
+                    
+                    <!-- NOT LOGGED IN STATE -->
+                    <div id="ig-logged-out" class="form-container">
+                        <p class="section-desc">Authenticate with your Instagram account to start reposting. Sessions are saved locally.</p>
+                        <form id="ig-login-form">
+                            <div class="input-group">
+                                <label for="ig-username">Username</label>
+                                <input type="text" id="ig-username" placeholder="e.g. my_profile" required autocomplete="username">
+                            </div>
+                            <div class="input-group">
+                                <label for="ig-password">Password</label>
+                                <input type="password" id="ig-password" placeholder="••••••••" required autocomplete="current-password">
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <label class="switch">
+                                    <input type="checkbox" id="ig-remember-me" checked>
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="checkbox-label">Remember credentials</span>
+                            </div>
+                            
+                            <!-- 2FA Code (Hidden by default) -->
+                            <div class="input-group hidden" id="ig-2fa-container">
+                                <label for="ig-2fa-code">2FA Code / OTP</label>
+                                <input type="text" id="ig-2fa-code" placeholder="6-digit code">
+                                <p class="help-text">Enter the 2FA code from your authenticator app.</p>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-full" id="btn-ig-login">
+                                <span>Connect Instagram</span>
+                                <i data-lucide="log-in"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- LOGGED IN STATE -->
+                    <div id="ig-logged-in" class="form-container hidden">
+                        <div class="profile-card">
+                            <div class="avatar">
+                                <i data-lucide="user"></i>
+                            </div>
+                            <div class="profile-info">
+                                <h3 id="ig-user-display">@username</h3>
+                                <p class="badge badge-success">Active Session</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-danger btn-full" id="btn-ig-logout">
+                            <span>Disconnect Session</span>
+                            <i data-lucide="log-out"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TELEGRAM CONFIGURATION -->
+                <div class="glass-card card-tg">
+                    <div class="card-header">
+                        <i data-lucide="send"></i>
+                        <h2>Telegram Hub</h2>
+                    </div>
+                    <div class="form-container">
+                        <p class="section-desc">Control your cloner or receive post status notifications in Telegram.</p>
+                        <form id="tg-config-form">
+                            <div class="input-group">
+                                <label for="tg-token">Bot Token</label>
+                                <input type="password" id="tg-token" placeholder="Enter Bot API Token">
+                            </div>
+                            <div class="input-group">
+                                <label for="tg-chat-id">Chat ID</label>
+                                <input type="text" id="tg-chat-id" placeholder="Smart-link active or enter ID">
+                                <p class="help-text">Tip: Send <code>/start</code> to your bot to auto-link your chat ID!</p>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <label class="switch">
+                                    <input type="checkbox" id="tg-notify-toggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="checkbox-label">Send repost alerts to Telegram</span>
+                            </div>
+
+                            <div class="checkbox-group">
+                                <label class="switch">
+                                    <input type="checkbox" id="tg-bot-toggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="checkbox-label">Enable Telegram remote commands</span>
+                            </div>
+
+                            <button type="submit" class="btn btn-secondary btn-full" id="btn-tg-save">
+                                <span>Save & Sync Settings</span>
+                                <i data-lucide="save"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: SCRAPER & CLONING -->
+            <section class="main-content">
+                
+                <!-- SEARCH TARGET & SETTINGS -->
+                <div class="glass-card card-scraper">
+                    <div class="card-header">
+                        <i data-lucide="search-code"></i>
+                        <h2>Source Profile Scraper</h2>
+                    </div>
+                    <div class="scraper-controls">
+                        <div class="search-box">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" id="target-handle" placeholder="Enter Instagram username or profile link (e.g. @cristiano)" value="">
+                        </div>
+                        <div class="limit-selector">
+                            <label for="scrape-limit">Limit</label>
+                            <select id="scrape-limit">
+                                <option value="6">6 Posts</option>
+                                <option value="12" selected>12 Posts</option>
+                                <option value="24">24 Posts</option>
+                                <option value="36">36 Posts</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" id="btn-fetch">
+                            <span>Fetch Media</span>
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SCRAPED POSTS GRID -->
+                <div class="results-container">
+                    <div class="grid-header">
+                        <h3>Scraped Posts</h3>
+                        <div class="grid-actions hidden" id="grid-actions-bar">
+                            <div class="series-config" id="series-config" style="display: flex; gap: 8px; margin-right: 12px; align-items: center;">
+                                <input type="text" id="series-name-input" placeholder="Series Title (Optional)" style="padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; width: 160px; font-size: 0.85rem;">
+                                <input type="number" id="series-part-input" value="1" min="1" placeholder="Part #" style="padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; width: 70px; font-size: 0.85rem;">
+                                <label style="display:flex; align-items:center; gap: 4px; font-size: 0.8rem; color: #9ca3af; cursor: pointer;" title="Post oldest selected media first">
+                                    <input type="checkbox" id="series-oldest-first" checked> Oldest First
+                                </label>
+                            </div>
+                            <button class="btn btn-text btn-small" id="btn-select-all">
+                                <i data-lucide="check-square"></i>
+                                <span>Select All</span>
+                            </button>
+                            <button class="btn btn-text btn-small" id="btn-clear-selection">
+                                <i data-lucide="square"></i>
+                                <span>Clear Selection</span>
+                            </button>
+                            <button class="btn btn-primary btn-repost-selected" id="btn-repost-selected">
+                                <span>Clone Selected (<span id="selected-count">0</span>)</span>
+                                <i data-lucide="copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder states -->
+                    <div id="grid-placeholder" class="grid-placeholder">
+                        <div class="placeholder-icon">
+                            <i data-lucide="images"></i>
+                        </div>
+                        <p class="placeholder-title">No Profile Fetched Yet</p>
+                        <p class="placeholder-desc">Connect your Instagram account, enter a target handle above, and hit "Fetch Media" to view post choices.</p>
+                    </div>
+
+                    <div id="grid-loading" class="grid-placeholder hidden">
+                        <div class="spinner"></div>
+                        <p class="placeholder-title">Fetching Instagram Profile...</p>
+                        <p class="placeholder-desc">This can take a few seconds as we scrape active feeds.</p>
+                    </div>
+
+                    <div id="grid-error" class="grid-placeholder hidden">
+                        <div class="error-icon">
+                            <i data-lucide="alert-triangle"></i>
+                        </div>
+                        <p class="placeholder-title">Failed to Scrape Profile</p>
+                        <p class="placeholder-desc" id="error-desc-text">Verify target profile username, make sure it is public or you follow them, and confirm your Instagram login.</p>
+                    </div>
+
+                    <!-- Actual Media Grid -->
+                    <div class="media-grid hidden" id="posts-grid">
+                        <!-- Media cards are injected here by JS -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- REPOSTING MODAL -->
+    <div class="modal-overlay hidden" id="progress-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <i data-lucide="refresh-cw" class="rotating"></i>
+                <h2>Cloning Progress</h2>
+            </div>
+            <div class="modal-body">
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="modal-progress-fill" style="width: 0%;"></div>
+                </div>
+                <div class="progress-stats">
+                    <span id="modal-progress-text">Cloning post 0 of 0...</span>
+                    <span id="modal-progress-percentage">0%</span>
+                </div>
+                
+                <div class="logs-panel">
+                    <h3>Execution Logs</h3>
+                    <div class="logs-container" id="modal-logs">
+                        <!-- Log lines will be appended here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary hidden" id="btn-close-modal">
+                    <span>Close Dashboard</span>
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
