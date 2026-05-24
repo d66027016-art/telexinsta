@@ -6,6 +6,7 @@ from pathlib import Path
 from instagrapi import Client
 from instagrapi.exceptions import TwoFactorRequired, ChallengeRequired, LoginRequired
 from user_manager import set_user_instagram, get_user_instagram
+from config_manager import load_config
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -23,9 +24,21 @@ class InstagramClientManager:
         self.session_file = SESSIONS_DIR / f"instagram_session_{self.chat_id}.json"
         self.cl = Client(request_timeout=60)
         self.cl.delay_range = [2, 5]  # Introduce slight delays to avoid rate limits
+        self.apply_proxy()
         self.logged_in = False
         self.current_username = None
         self.try_load_session()
+
+    def apply_proxy(self):
+        """Applies configured proxy to the Instagram client if present."""
+        config = load_config()
+        proxy = config.get("instagram_proxy")
+        if proxy:
+            logger.info(f"[{self.chat_id}] Setting Instagram client proxy: {proxy}")
+            try:
+                self.cl.set_proxy(proxy)
+            except Exception as e:
+                logger.error(f"[{self.chat_id}] Failed to set proxy: {e}")
 
     def try_load_session(self):
         """Attempts to load a saved session from disk to avoid password login."""
@@ -48,6 +61,7 @@ class InstagramClientManager:
                     pass
                 self.cl = Client(request_timeout=60)
                 self.cl.delay_range = [2, 5]
+                self.apply_proxy()
                 self.logged_in = False
                 self.current_username = None
         return False
@@ -101,6 +115,7 @@ class InstagramClientManager:
         
         self.cl = Client(request_timeout=60)
         self.cl.delay_range = [2, 5]
+        self.apply_proxy()
         self.logged_in = False
         self.current_username = None
         logger.info(f"[{self.chat_id}] Logged out and session cleared.")

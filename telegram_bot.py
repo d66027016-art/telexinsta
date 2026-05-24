@@ -5,7 +5,7 @@ import threading
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from config_manager import load_config, save_config
-from instagram_client import get_client
+from instagram_client import get_client, SESSIONS_DIR
 from user_manager import get_user_data, deduct_coin, add_coins
 from redeem_manager import create_redeem_code, redeem_code, list_active_codes, revoke_code
 
@@ -446,6 +446,7 @@ class TelegramBotManager:
                 help_text = (
                     "ℹ️ **How to use this bot:**\n"
                     "1. Connect your account using `/login <username> <password>`.\n"
+                    "   *Alternative:* If login fails due to security blocks, you can upload/send your local session `.json` file directly to this chat!\n"
                     "2. Send any Instagram username (e.g. `cristiano`) to me.\n"
                     "3. I will show you their latest posts/reels. By default, I fetch 10 posts.\n"
                     "   *Tip:* You can specify the number of posts to fetch by sending `username amount` (e.g. `cristiano 20`).\n"
@@ -454,6 +455,67 @@ class TelegramBotManager:
                     "🎁 Have a redeem code? Use `/redeem <code>` to add more coins to your account."
                 )
                 self.bot.reply_to(message, help_text, parse_mode="Markdown")
+
+        @self.bot.message_handler(content_types=['document'])
+        def handle_session_upload(message):
+            chat_id = message.chat.id
+            document = message.document
+            
+            if not document.file_name.endswith('.json'):
+                self.bot.reply_to(message, "❌ Please send a valid session JSON file.")
+                return
+            
+            status_msg = self.bot.reply_to(message, "⏳ Processing session file...")
+            
+            try:
+                # Download file from Telegram servers
+                file_info = self.bot.get_file(document.file_id)
+                downloaded_file = self.bot.download_file(file_info.file_path)
+                
+                # Check JSON validity
+                import json
+                session_data = json.loads(downloaded_file.decode('utf-8'))
+                
+                # Validate instagrapi structure
+                if not isinstance(session_data, dict) or 'uuids' not in session_data:
+                    self.bot.edit_message_text(
+                        "❌ Invalid session JSON format. Please upload a valid instagrapi settings JSON file.",
+                        chat_id=chat_id,
+                        message_id=status_msg.message_id
+                    )
+                    return
+                
+                # Save session to correct SESSIONS_DIR path
+                target_path = SESSIONS_DIR / f"instagram_session_{chat_id}.json"
+                with open(target_path, "wb") as f:
+                    f.write(downloaded_file)
+                
+                # Re-initialize/verify client
+                client = get_client(chat_id)
+                client.session_file = target_path
+                success = client.try_load_session()
+                
+                if success:
+                    self.bot.edit_message_text(
+                        f"✅ **Instagram session loaded successfully!**\n"
+                        f"Logged in as: `{client.current_username}`",
+                        chat_id=chat_id,
+                        message_id=status_msg.message_id,
+                        parse_mode="Markdown"
+                    )
+                else:
+                    self.bot.edit_message_text(
+                        "❌ Failed to validate session. The session might be expired or invalid.",
+                        chat_id=chat_id,
+                        message_id=status_msg.message_id
+                    )
+            except Exception as e:
+                logger.error(f"Session upload error: {e}")
+                self.bot.edit_message_text(
+                    f"❌ **Error processing file:** {str(e)}",
+                    chat_id=chat_id,
+                    message_id=status_msg.message_id
+                )
 
         @self.bot.message_handler(func=lambda message: True)
         def handle_target_username(message):

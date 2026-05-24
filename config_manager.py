@@ -15,7 +15,8 @@ DEFAULT_CONFIG = {
     "telegram_chat_id": "",
     "telegram_notifications_enabled": True,
     "telegram_bot_enabled": True,
-    "instagram_username": ""
+    "instagram_username": "",
+    "instagram_proxy": ""
 }
 
 def load_config():
@@ -35,7 +36,8 @@ def load_config():
     env_mappings = {
         "telegram_token": "TELEGRAM_TOKEN",
         "telegram_chat_id": "TELEGRAM_CHAT_ID",
-        "instagram_username": "INSTAGRAM_USERNAME"
+        "instagram_username": "INSTAGRAM_USERNAME",
+        "instagram_proxy": "INSTAGRAM_PROXY"
     }
     
     for config_key, env_var in env_mappings.items():
