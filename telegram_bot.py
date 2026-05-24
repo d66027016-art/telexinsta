@@ -430,6 +430,17 @@ class TelegramBotManager:
             else:
                 self.bot.reply_to(message, res["message"], parse_mode="Markdown")
 
+        @self.bot.message_handler(commands=['bal', 'balance'])
+        def handle_balance(message):
+            chat_id = message.chat.id
+            user_data = get_user_data(chat_id)
+            coins = user_data.get("coins", 50)
+            self.bot.reply_to(
+                message, 
+                f"🪙 **Your Coin Balance:** `{coins}` coins.",
+                parse_mode="Markdown"
+            )
+
         @self.bot.message_handler(func=lambda message: message.text in ['📊 Status', '❓ Help'])
         def handle_menu_options(message):
             client = get_client(message.chat.id)

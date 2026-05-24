@@ -3,5 +3,6 @@
     "telegram_chat_id": "YOUR_TELEGRAM_ADMIN_CHAT_ID",
     "telegram_notifications_enabled": true,
     "telegram_bot_enabled": true,
-    "instagram_username": "YOUR_INSTAGRAM_USERNAME"
+    "instagram_username": "YOUR_INSTAGRAM_USERNAME",
+    "instagram_proxy": "YOUR_INSTAGRAM_PROXY"
 }
